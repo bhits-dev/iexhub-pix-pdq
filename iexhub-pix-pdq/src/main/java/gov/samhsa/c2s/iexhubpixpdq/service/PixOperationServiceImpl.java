@@ -1,7 +1,6 @@
 package gov.samhsa.c2s.iexhubpixpdq.service;
 
 import gov.samhsa.c2s.iexhubpixpdq.config.IexhubPixPdqProperties;
-import gov.samhsa.c2s.pixclient.client.PixManagerClientService;
 import gov.samhsa.c2s.pixclient.service.PixManagerService;
 import gov.samhsa.c2s.pixclient.util.PixManagerBean;
 import gov.samhsa.c2s.pixclient.util.PixManagerMessageHelper;
@@ -117,11 +116,17 @@ public class PixOperationServiceImpl implements PixOperationService {
             log.error(e.getMessage());
         }
         log.debug("response" + pixMgrBean.getQueryMessage() + pixMgrBean.getQueryIdMap());
+        return pixMgrBean;
+    }
+
+    @Override
+    public String getPersonEid(String reqXMLPath) {
+        final PixManagerBean pixMgrBean = queryPerson(reqXMLPath);
         String eid = pixMgrBean.getQueryIdMap().entrySet().stream()
-                .filter(map -> iexhubPixPdqProperties.pixDomainId.equals(map.getKey()))
+                .filter(map -> iexhubPixPdqProperties.getGlobalDomainId().equals(map.getKey()))
                 .map(map -> map.getValue())
                 .collect(Collectors.joining());
         log.info("Eid \t" + eid);
-        return pixMgrBean;
+        return eid;
     }
 }
