@@ -22,26 +22,18 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class PixOperationServiceImpl implements PixOperationService {
-    /**
-     * The request xml to java.
-     */
-    @Autowired
-    private PixManagerRequestXMLToJava requestXMLToJava;
-
-    /**
-     * The pix mgr service.
-     */
-    @Autowired
-    private PixManagerService pixMgrService;
-
-    /**
-     * The pix manager message helper.
-     */
-    @Autowired
-    private PixManagerMessageHelper pixManagerMessageHelper;
+    private final PixManagerRequestXMLToJava requestXMLToJava;
+    private final PixManagerService pixMgrService;
+    private final PixManagerMessageHelper pixManagerMessageHelper;
+    private final IexhubPixPdqProperties iexhubPixPdqProperties;
 
     @Autowired
-    private IexhubPixPdqProperties iexhubPixPdqProperties;
+    public PixOperationServiceImpl(PixManagerRequestXMLToJava requestXMLToJava, PixManagerService pixMgrService, PixManagerMessageHelper pixManagerMessageHelper, IexhubPixPdqProperties iexhubPixPdqProperties) {
+        this.requestXMLToJava = requestXMLToJava;
+        this.pixMgrService = pixMgrService;
+        this.pixManagerMessageHelper = pixManagerMessageHelper;
+        this.iexhubPixPdqProperties = iexhubPixPdqProperties;
+    }
 
 
     @Override
@@ -50,9 +42,9 @@ public class PixOperationServiceImpl implements PixOperationService {
 
         // Convert c32 to pixadd string
 
-        PRPAIN201301UV02 request = new PRPAIN201301UV02();
+        PRPAIN201301UV02 request;
 
-        MCCIIN000002UV01 response = new MCCIIN000002UV01();
+        MCCIIN000002UV01 response;
         // Delegate to webServiceTemplate for the actual pixadd
         try {
             request = requestXMLToJava.getPIXAddReqObject(reqXMLPath);
@@ -74,9 +66,9 @@ public class PixOperationServiceImpl implements PixOperationService {
 
         log.debug("Received request to PIXUpdate");
 
-        PRPAIN201302UV02 request = new PRPAIN201302UV02();
+        PRPAIN201302UV02 request;
 
-        MCCIIN000002UV01 response = new MCCIIN000002UV01();
+        MCCIIN000002UV01 response;
         // Delegate to webServiceTemplate for the actual pixadd
         try {
 
@@ -100,9 +92,9 @@ public class PixOperationServiceImpl implements PixOperationService {
 
         log.debug("Received request to PIXQuery");
 
-        PRPAIN201309UV02 request = new PRPAIN201309UV02();
+        PRPAIN201309UV02 request;
 
-        PRPAIN201310UV02 response = new PRPAIN201310UV02();
+        PRPAIN201310UV02 response;
         // Delegate to webServiceTemplate for the actual pixadd
         try {
 

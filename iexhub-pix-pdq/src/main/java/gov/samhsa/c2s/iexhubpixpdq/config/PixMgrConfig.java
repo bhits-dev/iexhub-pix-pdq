@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-//@ImportResource({ "classpath:META-INF/cxf/cxf.xml" })
 public class PixMgrConfig {
 
     @Autowired
