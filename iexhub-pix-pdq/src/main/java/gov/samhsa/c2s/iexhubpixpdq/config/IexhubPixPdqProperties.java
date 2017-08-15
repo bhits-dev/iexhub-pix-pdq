@@ -13,13 +13,16 @@ import org.springframework.stereotype.Component;
 public class IexhubPixPdqProperties {
 
     @NotEmpty
-    public String pixManagerServiceEndPoint;
+    private String pixManagerServiceEndPoint;
 
     @NotEmpty
-    public String pixDomainId;
+    private String pixDomainId;
 
     @NotEmpty
-    public String pixDomainName;
+    private String pixDomainName;
+
+    @NotEmpty
+    private String globalDomainId;
 
 
 }
