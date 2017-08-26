@@ -1,9 +1,13 @@
 package gov.samhsa.c2s.iexhubpixpdq.config;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 @Component
 @Data
@@ -22,5 +26,15 @@ public class IexhubPixPdqProperties {
     @NotEmpty
     private String globalDomainId;
 
+    @NotNull
+    @Valid
+    private Fhir fhir;
 
+    @Data
+    public static class Fhir {
+        @NotBlank
+        private String serverUrl;
+        @NotBlank
+        private String clientSocketTimeoutInMs;
+    }
 }

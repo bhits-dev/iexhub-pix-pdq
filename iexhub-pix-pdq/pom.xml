@@ -29,7 +29,9 @@
         <commons-logging.version>1.2</commons-logging.version>
         <c2s.common-libraries.version>1.15.0</c2s.common-libraries.version>
         <hapi.fhir.version>2.2</hapi.fhir.version>
+        <modelmapper.version>0.7.8</modelmapper.version>
         <spring.cloud.version>Dalston.SR2</spring.cloud.version>
+        <saxon-he.version>9.6.0-3</saxon-he.version>
     </properties>
 
     <dependencies>
@@ -43,10 +45,6 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.retry</groupId>
@@ -66,7 +64,10 @@
             <groupId>gov.samhsa.c2s</groupId>
             <artifactId>resource-url</artifactId>
          </dependency>
-
+        <dependency>
+            <groupId>gov.samhsa.c2s</groupId>
+            <artifactId>document-transformer</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -99,6 +100,12 @@
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
         </dependency>
+        <!-- Saxon-HE dependencies -->
+        <dependency>
+            <groupId>net.sf.saxon</groupId>
+            <artifactId>Saxon-HE</artifactId>
+            <scope>runtime</scope>
+         </dependency>
         <!-- HAPI FHIR JARS -->
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
@@ -121,6 +128,11 @@
             <dependency>
                 <groupId>gov.samhsa.c2s</groupId>
                 <artifactId>resource-url</artifactId>
+                <version>${c2s.common-libraries.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>gov.samhsa.c2s</groupId>
+                <artifactId>document-transformer</artifactId>
                 <version>${c2s.common-libraries.version}</version>
             </dependency>
             <dependency>
@@ -155,6 +167,12 @@
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
                 <optional>true</optional>
+            </dependency>
+            <!-- Saxon-HE dependencies -->
+            <dependency>
+                <groupId>net.sf.saxon</groupId>
+                <artifactId>Saxon-HE</artifactId>
+                <version>${saxon-he.version}</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
