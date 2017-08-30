@@ -127,7 +127,7 @@ public class PixOperationServiceImpl implements PixOperationService {
     }
 
     @Override
-    public String getPersonEid(String reqXMLPath) {
+    public String getPersonEid(String patientId, String patientMrnOid) {
         final PixManagerBean pixMgrBean = queryPerson(reqXMLPath);
         String eid = pixMgrBean.getQueryIdMap().entrySet().stream()
                 .filter(map -> iexhubPixPdqProperties.getGlobalDomainId().equals(map.getKey()))

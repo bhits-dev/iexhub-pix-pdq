@@ -6,7 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -27,10 +28,11 @@ public class PixOperationController {
         this.pixOperationService = pixOperationService;
     }
 
-    @PostMapping("/eid")
+    @GetMapping("/patients/{patientId}/{patientMrnOid}/enterprise-id")
     @ResponseStatus(HttpStatus.OK)
-    public String getPersonEid(@RequestBody String reqXMLPath) {
-        return pixOperationService.getPersonEid(reqXMLPath);
+    public String getPersonEid(@PathVariable String patientId,
+                               @PathVariable String patientMrnOid) {
+        return pixOperationService.getPersonEid(patientId, patientMrnOid);
     }
 
     @RequestMapping(value="/Patient", consumes= MediaType.APPLICATION_JSON_UTF8_VALUE)
