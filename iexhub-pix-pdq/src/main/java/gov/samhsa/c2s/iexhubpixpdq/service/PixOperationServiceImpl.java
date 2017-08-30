@@ -12,7 +12,6 @@ import gov.samhsa.c2s.pixclient.util.PixManagerMessageHelper;
 import gov.samhsa.c2s.pixclient.util.PixManagerRequestXMLToJava;
 import gov.samhsa.c2s.pixclient.util.PixPdqConstants;
 import lombok.extern.slf4j.Slf4j;
-import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.v3.MCCIIN000002UV01;
 import org.hl7.v3.PRPAIN201301UV02;
@@ -27,7 +26,6 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,7 +64,8 @@ public class PixOperationServiceImpl implements PixOperationService {
             response = pixMgrService.pixManagerPRPAIN201301UV02(request);
             pixManagerMessageHelper.getAddUpdateMessage(response, pixMgrBean,
                     PixPdqConstants.PIX_ADD.getMsg());
-        } catch (JAXBException | IOException e) {
+        }
+        catch (JAXBException | IOException e) {
             pixManagerMessageHelper.getGeneralExpMessage(e, pixMgrBean,
                     PixPdqConstants.PIX_ADD.getMsg());
             log.error(e.getMessage() + e);
@@ -92,7 +91,8 @@ public class PixOperationServiceImpl implements PixOperationService {
             response = pixMgrService.pixManagerPRPAIN201302UV02(request);
             pixManagerMessageHelper.getAddUpdateMessage(response, pixMgrBean,
                     PixPdqConstants.PIX_UPDATE.getMsg());
-        } catch (JAXBException | IOException e) {
+        }
+        catch (JAXBException | IOException e) {
             pixManagerMessageHelper.getGeneralExpMessage(e, pixMgrBean,
                     PixPdqConstants.PIX_UPDATE.getMsg());
             log.error(e.getMessage());
@@ -117,7 +117,8 @@ public class PixOperationServiceImpl implements PixOperationService {
 
             response = pixMgrService.pixManagerPRPAIN201309UV02(request);
             pixManagerMessageHelper.getQueryMessage(response, pixMgrBean);
-        } catch (JAXBException | IOException e) {
+        }
+        catch (JAXBException | IOException e) {
             pixManagerMessageHelper.getGeneralExpMessage(e, pixMgrBean,
                     PixPdqConstants.PIX_QUERY.getMsg());
             log.error(e.getMessage());
@@ -161,7 +162,8 @@ public class PixOperationServiceImpl implements PixOperationService {
             hl7PixAddXml = hl7v3Transformer.transformToHl7v3PixXml(
                     simpleMarshaller.marshal(pixPatientDto),
                     XslResource.XSLT_FHIR_PATIENT_DTO_TO_PIX_ADD.getFileName());
-        } catch (SimpleMarshallerException e) {
+        }
+        catch (SimpleMarshallerException e) {
             log.error("Error in JAXB Transfroming", e);
             throw new PixOperationException(e);
         }
@@ -192,7 +194,7 @@ public class PixOperationServiceImpl implements PixOperationService {
     }
 
     private String getAdminGenderCode(String genderName) {
-        String genderCode="U";
+        String genderCode = "U";
         if (genderName.equalsIgnoreCase(Enumerations.AdministrativeGender.MALE.name())) {
             genderCode = "M";
         } else if (genderName.equalsIgnoreCase(Enumerations.AdministrativeGender.FEMALE.name())) {
@@ -205,7 +207,7 @@ public class PixOperationServiceImpl implements PixOperationService {
         return genderCode;
     }
 
-    private String getBirthDate(Date utilDate){
+    private String getBirthDate(Date utilDate) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
         StringBuffer sb = new StringBuffer();
         return simpleDateFormat.format(utilDate);
