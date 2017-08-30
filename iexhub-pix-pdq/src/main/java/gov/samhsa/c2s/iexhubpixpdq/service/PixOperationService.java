@@ -8,5 +8,6 @@ public interface PixOperationService extends PixManagerClientService {
 
     String getPersonEid(String reqXMLPath);
     String registerPerson(FhirPatientDto fhirPatientDto);
+    String editPerson(String id,FhirPatientDto fhirPatientDto);
 }
 
