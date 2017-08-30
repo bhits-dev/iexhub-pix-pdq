@@ -1,6 +1,10 @@
 package gov.samhsa.c2s.iexhubpixpdq.config;
 
 
+import gov.samhsa.c2s.common.document.accessor.DocumentAccessor;
+import gov.samhsa.c2s.common.document.accessor.DocumentAccessorImpl;
+import gov.samhsa.c2s.common.document.converter.DocumentXmlConverter;
+import gov.samhsa.c2s.common.document.converter.DocumentXmlConverterImpl;
 import gov.samhsa.c2s.common.document.transformer.XmlTransformer;
 import gov.samhsa.c2s.common.document.transformer.XmlTransformerImpl;
 import gov.samhsa.c2s.common.marshaller.SimpleMarshaller;
@@ -35,6 +39,17 @@ public class PixMgrConfig {
     public XmlTransformer xmlTransformer(){
         return new XmlTransformerImpl(simpleMarshaller());
     }
+
+    @Bean
+    public DocumentXmlConverter documentXmlConverter() {
+        return new DocumentXmlConverterImpl();
+    }
+
+    @Bean
+    public DocumentAccessor documentAccessor() {
+        return new DocumentAccessorImpl();
+    }
+
     @Bean
     public PixManagerRequestXMLToJava pixManagerRequestXMLToJava() {
         return new PixManagerRequestXMLToJava(simpleMarshaller());
