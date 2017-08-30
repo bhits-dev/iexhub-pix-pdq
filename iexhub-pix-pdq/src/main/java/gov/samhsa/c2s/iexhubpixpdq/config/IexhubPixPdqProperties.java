@@ -26,6 +26,9 @@ public class IexhubPixPdqProperties {
     @NotEmpty
     private String globalDomainId;
 
+    @NotEmpty
+    private String globalDomainIdTypeCode;
+
     @NotNull
     @Valid
     private Fhir fhir;
