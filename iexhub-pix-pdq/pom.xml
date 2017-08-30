@@ -64,11 +64,24 @@
         <dependency>
             <groupId>gov.samhsa.c2s</groupId>
             <artifactId>resource-url</artifactId>
-         </dependency>
+            <version>${c2s.common-libraries.version}</version>
+        </dependency>
         <dependency>
             <groupId>gov.samhsa.c2s</groupId>
             <artifactId>document-transformer</artifactId>
+            <version>${c2s.common-libraries.version}</version>
         </dependency>
+        <dependency>
+            <groupId>gov.samhsa.c2s</groupId>
+            <artifactId>document-accessor</artifactId>
+            <version>${c2s.common-libraries.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.samhsa.c2s</groupId>
+            <artifactId>document-converter</artifactId>
+            <version>${c2s.common-libraries.version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -126,16 +139,6 @@
     <dependencyManagement>
         <dependencies>
             <!-- C2S Common Libraries -->
-            <dependency>
-                <groupId>gov.samhsa.c2s</groupId>
-                <artifactId>resource-url</artifactId>
-                <version>${c2s.common-libraries.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>gov.samhsa.c2s</groupId>
-                <artifactId>document-transformer</artifactId>
-                <version>${c2s.common-libraries.version}</version>
-            </dependency>
             <dependency>
                 <groupId>gov.samhsa.c2s</groupId>
                 <artifactId>pix-pdq-client</artifactId>
