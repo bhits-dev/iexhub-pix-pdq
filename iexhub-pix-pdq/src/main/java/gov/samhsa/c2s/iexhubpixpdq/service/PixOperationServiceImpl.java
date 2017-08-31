@@ -149,7 +149,7 @@ public class PixOperationServiceImpl implements PixOperationService {
                 }
 
             } else {
-                log.error("Pix Query found no matching Patient");
+                log.error("Pix Query found no matching Patient:" + patientId + " Oid:" + patientMrnOid);
                 throw new PatientNotFoundException("Pix Query found no matching Patient. Query Message = " + pixMgrBean.getQueryMessage());
             }
 
