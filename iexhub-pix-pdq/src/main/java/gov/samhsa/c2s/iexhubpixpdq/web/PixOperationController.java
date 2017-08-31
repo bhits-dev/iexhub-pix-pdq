@@ -32,7 +32,7 @@ public class PixOperationController {
     @ResponseStatus(HttpStatus.OK)
     public String getPersonEid(@PathVariable String patientId,
                                @PathVariable String patientMrnOid) {
-        return pixOperationService.getPersonEid(patientId, patientMrnOid);
+        return pixOperationService.queryForEnterpriseId(patientId, patientMrnOid);
     }
 
     @RequestMapping(value="/Patient", consumes= MediaType.APPLICATION_JSON_UTF8_VALUE)

@@ -6,7 +6,7 @@ import gov.samhsa.c2s.pixclient.client.PixManagerClientService;
 
 public interface PixOperationService extends PixManagerClientService {
 
-    String getPersonEid(String patientId, String patientMrnOid);
+    String queryForEnterpriseId(String patientId, String patientMrnOid);
     String registerPerson(FhirPatientDto fhirPatientDto);
 }
 

@@ -12,6 +12,7 @@ import gov.samhsa.c2s.pixclient.util.PixManagerMessageHelper;
 import gov.samhsa.c2s.pixclient.util.PixManagerRequestXMLToJava;
 import gov.samhsa.c2s.pixclient.util.PixPdqConstants;
 import lombok.extern.slf4j.Slf4j;
+import org.hl7.fhir.dstu3.model.ContactPoint;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.v3.MCCIIN000002UV01;
 import org.hl7.v3.PRPAIN201301UV02;
@@ -26,7 +27,9 @@ import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.stream.Collectors;
+import java.util.Map;
+
+import static java.util.stream.Collectors.joining;
 
 @Service
 @Slf4j
@@ -37,6 +40,8 @@ public class PixOperationServiceImpl implements PixOperationService {
     private final IexhubPixPdqProperties iexhubPixPdqProperties;
     private final Hl7v3Transformer hl7v3Transformer;
     private final SimpleMarshaller simpleMarshaller;
+
+    private String SAMPLE_QUERY_REQUEST_XML = "empi_pixquery_sample.xml";
 
     @Autowired
     public PixOperationServiceImpl(PixManagerRequestXMLToJava requestXMLToJava, PixManagerService pixMgrService, PixManagerMessageHelper pixManagerMessageHelper, IexhubPixPdqProperties iexhubPixPdqProperties,
@@ -102,40 +107,56 @@ public class PixOperationServiceImpl implements PixOperationService {
     }
 
     @Override
-    public PixManagerBean queryPerson(String reqXMLPath) {
-        final PixManagerBean pixMgrBean = new PixManagerBean();
-
-        log.debug("Received request to PIXQuery");
-
-        PRPAIN201309UV02 request;
-
-        PRPAIN201310UV02 response;
-        // Delegate to webServiceTemplate for the actual pixadd
-        try {
-
-            request = requestXMLToJava.getPIXQueryReqObject(reqXMLPath);
-
-            response = pixMgrService.pixManagerPRPAIN201309UV02(request);
-            pixManagerMessageHelper.getQueryMessage(response, pixMgrBean);
-        }
-        catch (JAXBException | IOException e) {
-            pixManagerMessageHelper.getGeneralExpMessage(e, pixMgrBean,
-                    PixPdqConstants.PIX_QUERY.getMsg());
-            log.error(e.getMessage());
-        }
-        log.debug("response" + pixMgrBean.getQueryMessage() + pixMgrBean.getQueryIdMap());
-        return pixMgrBean;
+    public PixManagerBean queryPerson(String s) {
+        //TODO: Implement as necessary
+        return null;
     }
 
     @Override
-    public String getPersonEid(String patientId, String patientMrnOid) {
-        final PixManagerBean pixMgrBean = queryPerson(reqXMLPath);
-        String eid = pixMgrBean.getQueryIdMap().entrySet().stream()
-                .filter(map -> iexhubPixPdqProperties.getGlobalDomainId().equals(map.getKey()))
-                .map(map -> map.getValue())
-                .collect(Collectors.joining());
-        log.info("Eid \t" + eid);
-        return eid;
+    public String queryForEnterpriseId(String patientId, String patientMrnOid) {
+        final PixManagerBean pixMgrBean = new PixManagerBean();
+        try {
+            //First, get sample request object
+            PRPAIN201309UV02 request = requestXMLToJava.getPIXQueryReqObject(SAMPLE_QUERY_REQUEST_XML);
+
+            //Next, change the sample request data to include the right query params
+            org.hl7.v3.II patientIdentifierValue = request.getControlActProcess().getQueryByParameter().getValue().getParameterList().getPatientIdentifier().get(0).getValue().get(0);
+            patientIdentifierValue.setRoot(patientMrnOid);
+            patientIdentifierValue.setExtension(patientId);
+
+            //Query
+            PRPAIN201310UV02 response = pixMgrService.pixManagerPRPAIN201309UV02(request);
+            pixManagerMessageHelper.setQueryMessage(response, pixMgrBean);
+
+            String globalDomainId = iexhubPixPdqProperties.getGlobalDomainId();
+            if (pixMgrBean.isSuccess()) {
+                String enterpriseIdValue = pixMgrBean.getQueryIdMap().entrySet().stream()
+                        .filter(map -> globalDomainId.equals(map.getKey()))
+                        .map(Map.Entry::getValue)
+                        .collect(joining());
+
+                log.debug("Found EnterpriseIdValue = " + enterpriseIdValue);
+
+                if (enterpriseIdValue != null && !enterpriseIdValue.isEmpty()) {
+                    //Convert to this format: d3bb3930-7241-11e3-b4f7-00155d3a2124^^^&2.16.840.1.113883.4.357&ISO
+                    String enterpriseId = enterpriseIdValue + "^^^&" + globalDomainId + "&" + iexhubPixPdqProperties.getGlobalDomainIdTypeCode();
+                    log.info("Found EnterpriseId = " + enterpriseId);
+                    return enterpriseId;
+                } else {
+                    log.error("Pix Query was successful, but no matching value found that matches with identifier " + globalDomainId);
+                    throw new PixOperationException("No patient identifier found that matches with the Identifier Domain value: " + globalDomainId);
+                }
+
+            } else {
+                log.error("Pix Query was unsuccessful");
+                throw new PixOperationException("Pix Query was unsuccessful. Query Message = " + pixMgrBean.getQueryMessage());
+            }
+
+        }
+        catch (JAXBException | IOException e) {
+            log.error("Error when converting QUERY_REQUEST_XML to PRPAIN201301UV02 request object", e);
+            throw new PixOperationException("Error when converting QUERY_REQUEST_XML to PRPAIN201301UV02 request object", e);
+        }
     }
 
     @Override
@@ -157,7 +178,7 @@ public class PixOperationServiceImpl implements PixOperationService {
 
     private String buildFhirPatient2PixAddXml(PixPatientDto pixPatientDto) {
 
-        String hl7PixAddXml = null;
+        String hl7PixAddXml;
         try {
             hl7PixAddXml = hl7v3Transformer.transformToHl7v3PixXml(
                     simpleMarshaller.marshal(pixPatientDto),
@@ -187,7 +208,7 @@ public class PixOperationServiceImpl implements PixOperationService {
         //TODO :: Need to set email and telephone no seperately
         pixPatientDto.setTelecomValue(
                 fhirPatientDto.getPatient().getTelecom().stream()
-                        .map(value -> value.getValue()).findFirst().orElse(""));
+                        .map(ContactPoint::getValue).findFirst().orElse(""));
 
         //TODO:: Set Address Values
         return pixPatientDto;
@@ -209,7 +230,6 @@ public class PixOperationServiceImpl implements PixOperationService {
 
     private String getBirthDate(Date utilDate) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
-        StringBuffer sb = new StringBuffer();
         return simpleDateFormat.format(utilDate);
     }
 }
