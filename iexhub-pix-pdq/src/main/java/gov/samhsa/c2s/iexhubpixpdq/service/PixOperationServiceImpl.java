@@ -3,6 +3,7 @@ package gov.samhsa.c2s.iexhubpixpdq.service;
 import gov.samhsa.c2s.common.marshaller.SimpleMarshaller;
 import gov.samhsa.c2s.common.marshaller.SimpleMarshallerException;
 import gov.samhsa.c2s.iexhubpixpdq.config.IexhubPixPdqProperties;
+import gov.samhsa.c2s.iexhubpixpdq.exception.PatientNotFoundException;
 import gov.samhsa.c2s.iexhubpixpdq.exception.PixOperationException;
 import gov.samhsa.c2s.iexhubpixpdq.service.dto.FhirPatientDto;
 import gov.samhsa.c2s.iexhubpixpdq.service.dto.PixPatientDto;
@@ -144,7 +145,7 @@ public class PixOperationServiceImpl implements PixOperationService {
                     return enterpriseId;
                 } else {
                     log.error("Pix Query was successful, but no matching value found that matches with identifier " + globalDomainId);
-                    throw new PixOperationException("No patient identifier found that matches with the Identifier Domain value: " + globalDomainId);
+                    throw new PatientNotFoundException("No patient identifier found that matches with the Identifier Domain value: " + globalDomainId);
                 }
 
             } else {
@@ -208,7 +209,7 @@ public class PixOperationServiceImpl implements PixOperationService {
     }
 
     private String buildFhirPatient2PixUpdateXml(PixPatientDto pixPatientDto){
-        String h17PixUpdateXml=null;
+        String h17PixUpdateXml;
         try{
             h17PixUpdateXml=hl7v3Transformer.transformToHl7v3PixXml(simpleMarshaller.marshal(pixPatientDto),
                     XslResource.XSLT_FHIR_PATIENT_DTO_TO_PIX_UPDATE.getFileName());
