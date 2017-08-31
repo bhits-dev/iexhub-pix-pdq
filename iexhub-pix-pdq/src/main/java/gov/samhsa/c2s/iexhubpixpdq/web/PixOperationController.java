@@ -39,7 +39,12 @@ public class PixOperationController {
     @ResponseStatus(HttpStatus.CREATED)
     public void addPerson(@RequestBody FhirPatientDto fhirPatientDto) {
          pixOperationService.registerPerson(fhirPatientDto);
+    }
 
+    @RequestMapping(value="/Patient/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void updatePerson(@PathVariable String id, @RequestBody FhirPatientDto fhirPatientDto){
+        pixOperationService.editPerson(id,fhirPatientDto);
     }
 
     private String getRequest(String reqXml) {

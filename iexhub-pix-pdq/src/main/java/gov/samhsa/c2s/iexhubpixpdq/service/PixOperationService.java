@@ -8,5 +8,6 @@ public interface PixOperationService extends PixManagerClientService {
 
     String queryForEnterpriseId(String patientId, String patientMrnOid);
     String registerPerson(FhirPatientDto fhirPatientDto);
+    String editPerson(String id,FhirPatientDto fhirPatientDto);
 }
 

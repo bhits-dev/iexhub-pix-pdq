@@ -176,6 +176,21 @@ public class PixOperationServiceImpl implements PixOperationService {
         return pixMgrBean.getAddMessage();
     }
 
+    @Override
+    public String editPerson(String id,FhirPatientDto fhirPatientDto){
+        //Convert FHIR patient to PatientDto
+        PixPatientDto pixPatientDto=fhirPatientDtoToPixPatientDto(fhirPatientDto);
+        PixManagerBean pixMgrBean=init(pixPatientDto);
+        //Translate PatientDto to Pix
+        String pixUpdateXml=buildFhirPatient2PixUpdateXml(pixPatientDto);
+        //Invoke updatePerson method
+        pixMgrBean.setUpdateMessage(updatePerson(pixUpdateXml));
+        Assert.hasText(pixMgrBean.getUpdateMessage(),
+                "Update Success");
+
+        return pixMgrBean.getUpdateMessage();
+    }
+
     private String buildFhirPatient2PixAddXml(PixPatientDto pixPatientDto) {
 
         String hl7PixAddXml;
@@ -190,6 +205,18 @@ public class PixOperationServiceImpl implements PixOperationService {
         }
         return hl7PixAddXml;
 
+    }
+
+    private String buildFhirPatient2PixUpdateXml(PixPatientDto pixPatientDto){
+        String h17PixUpdateXml=null;
+        try{
+            h17PixUpdateXml=hl7v3Transformer.transformToHl7v3PixXml(simpleMarshaller.marshal(pixPatientDto),
+                    XslResource.XSLT_FHIR_PATIENT_DTO_TO_PIX_UPDATE.getFileName());
+        }catch(SimpleMarshallerException e){
+            log.error("Error in JAXB Transforming",e);
+            throw new PixOperationException(e);
+        }
+        return h17PixUpdateXml;
     }
 
     private PixManagerBean init(PixPatientDto pixPatientDto) {
@@ -211,6 +238,7 @@ public class PixOperationServiceImpl implements PixOperationService {
                         .map(ContactPoint::getValue).findFirst().orElse(""));
 
         //TODO:: Set Address Values
+
         return pixPatientDto;
     }
 
