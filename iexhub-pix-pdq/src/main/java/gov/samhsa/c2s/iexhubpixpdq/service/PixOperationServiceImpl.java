@@ -149,8 +149,8 @@ public class PixOperationServiceImpl implements PixOperationService {
                 }
 
             } else {
-                log.error("Pix Query was unsuccessful");
-                throw new PixOperationException("Pix Query was unsuccessful. Query Message = " + pixMgrBean.getQueryMessage());
+                log.error("Pix Query found no matching Patient");
+                throw new PatientNotFoundException("Pix Query found no matching Patient. Query Message = " + pixMgrBean.getQueryMessage());
             }
 
         }
