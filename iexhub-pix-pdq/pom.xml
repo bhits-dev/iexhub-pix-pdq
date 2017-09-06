@@ -33,7 +33,6 @@
         <spring.cloud.version>Dalston.SR2</spring.cloud.version>
         <saxon-he.version>9.6.0-3</saxon-he.version>
         <docker.maven.version>0.4.3</docker.maven.version>
-        <c2s.common-libraries.version>1.13.0</c2s.common-libraries.version>
         <maven-enforcer-plugin.version>3.0.0-M1</maven-enforcer-plugin.version>
     </properties>
 
@@ -89,7 +88,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
