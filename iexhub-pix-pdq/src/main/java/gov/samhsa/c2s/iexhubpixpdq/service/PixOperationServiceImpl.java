@@ -108,12 +108,6 @@ public class PixOperationServiceImpl implements PixOperationService {
     }
 
     @Override
-    public PixManagerBean queryPerson(String s) {
-        //TODO: Implement as necessary
-        return null;
-    }
-
-    @Override
     public String queryForEnterpriseId(String patientId, String patientMrnOid) {
         final PixManagerBean pixMgrBean = new PixManagerBean();
         try {
