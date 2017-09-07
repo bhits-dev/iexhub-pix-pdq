@@ -28,7 +28,7 @@ public class PixOperationController {
         this.pixOperationService = pixOperationService;
     }
 
-    @GetMapping("/patients/{patientId}/{patientMrnOid}/enterprise-id")
+    @GetMapping("/patients/{patientId}/mrn-oid/{patientMrnOid}/enterprise-id")
     @ResponseStatus(HttpStatus.OK)
     public String getPersonEid(@PathVariable String patientId,
                                @PathVariable String patientMrnOid) {
