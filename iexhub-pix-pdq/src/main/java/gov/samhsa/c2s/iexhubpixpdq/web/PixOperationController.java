@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -35,25 +37,15 @@ public class PixOperationController {
         return pixOperationService.queryForEnterpriseId(patientId, patientMrnOid);
     }
 
-    @RequestMapping(value="/Patient", consumes= MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value="/Patient", consumes= MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public void addPerson(@RequestBody FhirPatientDto fhirPatientDto) {
          pixOperationService.registerPerson(fhirPatientDto);
     }
 
-    @RequestMapping(value="/Patient/{id}")
+    @PutMapping(value="/Patient/{patientId}")
     @ResponseStatus(HttpStatus.OK)
-    public void updatePerson(@PathVariable String id, @RequestBody FhirPatientDto fhirPatientDto){
-        pixOperationService.editPerson(id,fhirPatientDto);
-    }
-
-    private String getRequest(String reqXml) {
-        String sampleReq = null;
-        try (InputStream ioStream = ClassLoader.getSystemResourceAsStream(reqXml)) {
-            sampleReq = IOUtils.toString(ioStream, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            log.error(e.getMessage() + e);
-        }
-        return sampleReq;
+    public void updatePerson(@PathVariable String patientId, @RequestBody FhirPatientDto fhirPatientDto){
+        pixOperationService.editPerson(patientId,fhirPatientDto);
     }
 }
