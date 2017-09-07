@@ -66,10 +66,14 @@
                                     <urn:administrativeGenderCode code="{/c2s:PixPatientDto/c2s:administrativeGenderCode[1]}"/>
                                     <urn:birthTime value="{/c2s:PixPatientDto/c2s:birthTimeValue[1]}"/>
                                     <urn:addr>
-                                        <urn:streetAddressLine>""</urn:streetAddressLine>
-                                        <urn:city>""</urn:city>
-                                        <urn:state>""</urn:state>
-                                        <urn:postalCode>""</urn:postalCode>
+                                        <urn:streetAddressLine> <xsl:value-of
+                                                select="/c2s:PixPatientDto/c2s:addrStreetAddressLine[1]" /></urn:streetAddressLine>
+                                        <urn:city><xsl:value-of
+                                                select="/c2s:PixPatientDto/c2s:addrCity[1]" /></urn:city>
+                                        <urn:state><xsl:value-of
+                                                select="/c2s:PixPatientDto/c2s:addrState[1]" /></urn:state>
+                                        <urn:postalCode><xsl:value-of
+                                                select="/c2s:PixPatientDto/c2s:addrPostalCode[1]" /></urn:postalCode>
                                     </urn:addr>
                                 </urn:patientPerson>
                             </urn:patient>
