@@ -70,8 +70,7 @@ public class PixOperationServiceImpl implements PixOperationService {
             response = pixMgrService.pixManagerPRPAIN201301UV02(request);
             pixManagerMessageHelper.getAddUpdateMessage(response, pixMgrBean,
                     PixPdqConstants.PIX_ADD.getMsg());
-        }
-        catch (JAXBException | IOException e) {
+        } catch (JAXBException | IOException e) {
             pixManagerMessageHelper.getGeneralExpMessage(e, pixMgrBean,
                     PixPdqConstants.PIX_ADD.getMsg());
             log.error(e.getMessage() + e);
@@ -97,8 +96,7 @@ public class PixOperationServiceImpl implements PixOperationService {
             response = pixMgrService.pixManagerPRPAIN201302UV02(request);
             pixManagerMessageHelper.getAddUpdateMessage(response, pixMgrBean,
                     PixPdqConstants.PIX_UPDATE.getMsg());
-        }
-        catch (JAXBException | IOException e) {
+        } catch (JAXBException | IOException e) {
             pixManagerMessageHelper.getGeneralExpMessage(e, pixMgrBean,
                     PixPdqConstants.PIX_UPDATE.getMsg());
             log.error(e.getMessage());
@@ -147,8 +145,7 @@ public class PixOperationServiceImpl implements PixOperationService {
                 throw new PatientNotFoundException("Pix Query found no matching Patient. Query Message = " + pixMgrBean.getQueryMessage());
             }
 
-        }
-        catch (JAXBException | IOException e) {
+        } catch (JAXBException | IOException e) {
             log.error("Error when converting QUERY_REQUEST_XML to PRPAIN201301UV02 request object", e);
             throw new PixOperationException("Error when converting QUERY_REQUEST_XML to PRPAIN201301UV02 request object", e);
         }
@@ -172,12 +169,12 @@ public class PixOperationServiceImpl implements PixOperationService {
     }
 
     @Override
-    public String editPerson(String id,FhirPatientDto fhirPatientDto){
+    public String editPerson(String id, FhirPatientDto fhirPatientDto) {
         //Convert FHIR patient to PatientDto
-        PixPatientDto pixPatientDto=fhirPatientDtoToPixPatientDto(fhirPatientDto);
-        PixManagerBean pixMgrBean=init(pixPatientDto);
+        PixPatientDto pixPatientDto = fhirPatientDtoToPixPatientDto(fhirPatientDto);
+        PixManagerBean pixMgrBean = init(pixPatientDto);
         //Translate PatientDto to Pix
-        String pixUpdateXml=buildFhirPatient2PixUpdateXml(pixPatientDto);
+        String pixUpdateXml = buildFhirPatient2PixUpdateXml(pixPatientDto);
         //Invoke updatePerson method
         pixMgrBean.setUpdateMessage(updatePerson(pixUpdateXml));
         Assert.hasText(pixMgrBean.getUpdateMessage(),
@@ -193,8 +190,7 @@ public class PixOperationServiceImpl implements PixOperationService {
             hl7PixAddXml = hl7v3Transformer.transformToHl7v3PixXml(
                     simpleMarshaller.marshal(pixPatientDto),
                     XslResource.XSLT_FHIR_PATIENT_DTO_TO_PIX_ADD.getFileName());
-        }
-        catch (SimpleMarshallerException e) {
+        } catch (SimpleMarshallerException e) {
             log.error("Error in JAXB Transfroming", e);
             throw new PixOperationException(e);
         }
@@ -202,13 +198,13 @@ public class PixOperationServiceImpl implements PixOperationService {
 
     }
 
-    private String buildFhirPatient2PixUpdateXml(PixPatientDto pixPatientDto){
+    private String buildFhirPatient2PixUpdateXml(PixPatientDto pixPatientDto) {
         String h17PixUpdateXml;
-        try{
-            h17PixUpdateXml=hl7v3Transformer.transformToHl7v3PixXml(simpleMarshaller.marshal(pixPatientDto),
+        try {
+            h17PixUpdateXml = hl7v3Transformer.transformToHl7v3PixXml(simpleMarshaller.marshal(pixPatientDto),
                     XslResource.XSLT_FHIR_PATIENT_DTO_TO_PIX_UPDATE.getFileName());
-        }catch(SimpleMarshallerException e){
-            log.error("Error in JAXB Transforming",e);
+        } catch (SimpleMarshallerException e) {
+            log.error("Error in JAXB Transforming", e);
             throw new PixOperationException(e);
         }
         return h17PixUpdateXml;
@@ -232,8 +228,14 @@ public class PixOperationServiceImpl implements PixOperationService {
                 fhirPatientDto.getPatient().getTelecom().stream()
                         .map(ContactPoint::getValue).findFirst().orElse(""));
 
-        //TODO:: Set Address Values
-
+        if (fhirPatientDto.getPatient().getAddress().isEmpty()) {
+            pixPatientDto.setAddrStreetAddressLine("");
+        } else {
+            pixPatientDto.setAddrCity((fhirPatientDto.getPatient().getAddress().get(0).getCity() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getCity().toString());
+            pixPatientDto.setAddrState((fhirPatientDto.getPatient().getAddress().get(0).getState() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getState().toString());
+            pixPatientDto.setAddrPostalCode((fhirPatientDto.getPatient().getAddress().get(0).getPostalCode() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getPostalCode().toString());
+            pixPatientDto.setAddrStreetAddressLine((fhirPatientDto.getPatient().getAddress().get(0).getLine() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getLine().toString());
+        }
         return pixPatientDto;
     }
 

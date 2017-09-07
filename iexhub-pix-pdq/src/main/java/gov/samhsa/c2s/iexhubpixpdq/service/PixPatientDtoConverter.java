@@ -22,6 +22,9 @@ public class PixPatientDtoConverter {
         pixPatientDto.setPatientLastName(fhirPatientDto.getPatient().getNameFirstRep().getFamily());
         pixPatientDto.setIdExtension(fhirPatientDto.getPatient().getIdentifier().get(0).getValue());
         pixPatientDto.setAdministrativeGenderCode(fhirPatientDto.getPatient().getGender().name());
+        pixPatientDto.setAddrCity(fhirPatientDto.getPatient().getAddress().get(0).getCity());
+        pixPatientDto.setAddrPostalCode(fhirPatientDto.getPatient().getAddress().get(0).getPostalCode());
+        pixPatientDto.setAddrState(fhirPatientDto.getPatient().getAddress().get(0).getState());
         return pixPatientDto;
     }
 
