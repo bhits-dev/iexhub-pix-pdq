@@ -3,8 +3,8 @@ package gov.samhsa.c2s.iexhubpixpdq.service;
 import gov.samhsa.c2s.common.marshaller.SimpleMarshaller;
 import gov.samhsa.c2s.common.marshaller.SimpleMarshallerException;
 import gov.samhsa.c2s.iexhubpixpdq.config.IexhubPixPdqProperties;
-import gov.samhsa.c2s.iexhubpixpdq.exception.PatientNotFoundException;
-import gov.samhsa.c2s.iexhubpixpdq.exception.PixOperationException;
+import gov.samhsa.c2s.iexhubpixpdq.service.exception.PatientNotFoundException;
+import gov.samhsa.c2s.iexhubpixpdq.service.exception.PixOperationException;
 import gov.samhsa.c2s.iexhubpixpdq.service.dto.FhirPatientDto;
 import gov.samhsa.c2s.iexhubpixpdq.service.dto.PixPatientDto;
 import gov.samhsa.c2s.pixclient.service.PixManagerService;
@@ -105,12 +105,6 @@ public class PixOperationServiceImpl implements PixOperationService {
         }
         log.debug("response" + pixMgrBean.getAddMessage());
         return pixMgrBean.getUpdateMessage();
-    }
-
-    @Override
-    public PixManagerBean queryPerson(String s) {
-        //TODO: Implement as necessary
-        return null;
     }
 
     @Override

@@ -1,7 +1,7 @@
 package gov.samhsa.c2s.iexhubpixpdq.service;
 
 import gov.samhsa.c2s.common.document.transformer.XmlTransformer;
-import gov.samhsa.c2s.iexhubpixpdq.exception.Hl7v3TransformerException;
+import gov.samhsa.c2s.iexhubpixpdq.service.exception.Hl7v3TransformerException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ResourceLoader;

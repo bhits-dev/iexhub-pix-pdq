@@ -23,11 +23,14 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <cxf.version>3.1.12</cxf.version>
         <java.version>1.8</java.version>
-        <pix-pdq-client.version>0.2.0-SNAPSHOT</pix-pdq-client.version>
         <lombok.version>1.16.18</lombok.version>
         <junit.version>4.12</junit.version>
         <commons-logging.version>1.2</commons-logging.version>
-        <c2s.common-libraries.version>1.16.0-SNAPSHOT</c2s.common-libraries.version>
+        <c2s.resource-url.version>1.16.0</c2s.resource-url.version>
+        <c2s.document-transformer.version>1.16.0</c2s.document-transformer.version>
+        <c2s.document-accessor.version>1.16.0</c2s.document-accessor.version>
+        <c2s.document-converter.version>1.16.0</c2s.document-converter.version>
+        <c2s.pix-pdq-client.version>0.2.0</c2s.pix-pdq-client.version>
         <hapi.fhir.version>2.2</hapi.fhir.version>
         <modelmapper.version>0.7.8</modelmapper.version>
         <spring.cloud.version>Dalston.SR2</spring.cloud.version>
@@ -64,28 +67,28 @@
         <dependency>
             <groupId>gov.samhsa.c2s</groupId>
             <artifactId>resource-url</artifactId>
-            <version>${c2s.common-libraries.version}</version>
+            <version>${c2s.resource-url.version}</version>
         </dependency>
         <dependency>
             <groupId>gov.samhsa.c2s</groupId>
             <artifactId>document-transformer</artifactId>
-            <version>${c2s.common-libraries.version}</version>
+            <version>${c2s.document-transformer.version}</version>
         </dependency>
         <dependency>
             <groupId>gov.samhsa.c2s</groupId>
             <artifactId>document-accessor</artifactId>
-            <version>${c2s.common-libraries.version}</version>
+            <version>${c2s.document-accessor.version}</version>
         </dependency>
         <dependency>
             <groupId>gov.samhsa.c2s</groupId>
             <artifactId>document-converter</artifactId>
-            <version>${c2s.common-libraries.version}</version>
+            <version>${c2s.document-converter.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -99,16 +102,16 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-actuator</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
@@ -134,6 +137,13 @@
             <artifactId>hapi-fhir-structures-dstu3</artifactId>
         </dependency>
         <!-- HAPI FHIR JARS -->
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -142,7 +152,7 @@
             <dependency>
                 <groupId>gov.samhsa.c2s</groupId>
                 <artifactId>pix-pdq-client</artifactId>
-                <version>${pix-pdq-client.version}</version>
+                <version>${c2s.pix-pdq-client.version}</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>jcl-over-slf4j</artifactId>
@@ -177,12 +187,6 @@
                 <groupId>net.sf.saxon</groupId>
                 <artifactId>Saxon-HE</artifactId>
                 <version>${saxon-he.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-                <scope>test</scope>
             </dependency>
             <!-- HAPI FHIR JARS -->
             <dependency>

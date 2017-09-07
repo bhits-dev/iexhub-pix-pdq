@@ -13,9 +13,13 @@ c2s:
     globalDomainId: 2.16.840.1.113883.4.357
     globalDomainIdTypeCode: hl7
     fhir:
-      # configure fhir server base url
-      serverUrl: http://bhitsdevhie01/hapi-fhir-jpaserver/baseStu3
-      clientSocketTimeoutInMs: 768000
+      capability-statement:
+        publisher: BHITS
+        software:
+          name: Consent2Share IExHub PIX/PDQ
+          version: @project.version@
+        implementation:
+          description: ${c2s.iexhub-pix-pdq.fhir.capability-statement.software.name}
 ---
 spring:
   profiles: docker

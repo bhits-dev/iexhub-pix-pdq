@@ -2,7 +2,6 @@ package gov.samhsa.c2s.iexhubpixpdq.config;
 
 import lombok.Data;
 import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -14,19 +13,19 @@ import javax.validation.constraints.NotNull;
 @ConfigurationProperties(prefix = "c2s.iexhub-pix-pdq")
 public class IexhubPixPdqProperties {
 
-    @NotEmpty
+    @NotBlank
     private String pixManagerServiceEndPoint;
 
-    @NotEmpty
+    @NotBlank
     private String pixDomainId;
 
-    @NotEmpty
+    @NotBlank
     private String pixDomainName;
 
-    @NotEmpty
+    @NotBlank
     private String globalDomainId;
 
-    @NotEmpty
+    @NotBlank
     private String globalDomainIdTypeCode;
 
     @NotNull
@@ -35,9 +34,38 @@ public class IexhubPixPdqProperties {
 
     @Data
     public static class Fhir {
-        @NotBlank
-        private String serverUrl;
-        @NotBlank
-        private String clientSocketTimeoutInMs;
+        @NotNull
+        @Valid
+        private CapabilityStatement capabilityStatement;
+
+        public interface MediaType {
+            String APPLICATION_FHIR_JSON_UTF8_VALUE = "application/fhir+json;charset=UTF-8";
+        }
+
+        @Data
+        public static class CapabilityStatement {
+            @NotBlank
+            private String publisher;
+            @NotNull
+            @Valid
+            private Software software;
+            @NotNull
+            @Valid
+            private Implementation implementation;
+
+            @Data
+            public static class Software {
+                @NotBlank
+                private String name;
+                @NotBlank
+                private String version;
+            }
+
+            @Data
+            public static class Implementation {
+                @NotBlank
+                private String description;
+            }
+        }
     }
 }
