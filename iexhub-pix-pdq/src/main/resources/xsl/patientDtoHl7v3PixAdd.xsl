@@ -62,11 +62,21 @@
 													select="/c2s:PixPatientDto/c2s:patientLastName[1]"/>
 										</urn:family>
 									</urn:name>
-									<urn:telecom value="{/c2s:PixPatientDto/c2s:telecomValue[1]}" />
+									<urn:telecom value="email:{/c2s:PixPatientDto/c2s:telecomValue[1]}" />
 									<urn:administrativeGenderCode
 											code="{/c2s:PixPatientDto/c2s:administrativeGenderCode[1]}"/>
 									<urn:birthTime
 											value="{/c2s:PixPatientDto/c2s:birthTimeValue[1]}"/>
+									<urn:addr>
+										<urn:streetAddressLine> <xsl:value-of
+												select="/c2s:PixPatientDto/c2s:addrStreetAddressLine[1]" /></urn:streetAddressLine>
+										<urn:city><xsl:value-of
+												select="/c2s:PixPatientDto/c2s:addrCity[1]" /></urn:city>
+										<urn:state><xsl:value-of
+												select="/c2s:PixPatientDto/c2s:addrState[1]" /></urn:state>
+										<urn:postalCode><xsl:value-of
+												select="/c2s:PixPatientDto/c2s:addrPostalCode[1]" /></urn:postalCode>
+									</urn:addr>
 								</urn:patientPerson>
 							</urn:patient>
 						</urn:subject1>
