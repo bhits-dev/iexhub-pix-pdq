@@ -153,6 +153,7 @@ public class PixOperationServiceImpl implements PixOperationService {
 
     @Override
     public String registerPerson(FhirPatientDto fhirPatientDto) {
+
         // Convert FHIR Patient to PatientDto
         PixPatientDto pixPatientDto = fhirPatientDtoToPixPatientDto(fhirPatientDto);
         PixManagerBean pixMgrBean = init(pixPatientDto);
@@ -163,13 +164,13 @@ public class PixOperationServiceImpl implements PixOperationService {
         Assert.hasText(
                 pixMgrBean.getAddMessage(),
                 "Add Success!");
-  /*      eid = pixService.getEid(mrn);
-        Assert.hasText(eid, "EID cannot be retrieved from MPI!");    */
         return pixMgrBean.getAddMessage();
     }
 
     @Override
-    public String editPerson(String id, FhirPatientDto fhirPatientDto) {
+    public String editPerson(String patientId, FhirPatientDto fhirPatientDto) {
+        // TODO:: Assert patienid
+
         //Convert FHIR patient to PatientDto
         PixPatientDto pixPatientDto = fhirPatientDtoToPixPatientDto(fhirPatientDto);
         PixManagerBean pixMgrBean = init(pixPatientDto);
@@ -234,7 +235,7 @@ public class PixOperationServiceImpl implements PixOperationService {
             pixPatientDto.setAddrCity((fhirPatientDto.getPatient().getAddress().get(0).getCity() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getCity().toString());
             pixPatientDto.setAddrState((fhirPatientDto.getPatient().getAddress().get(0).getState() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getState().toString());
             pixPatientDto.setAddrPostalCode((fhirPatientDto.getPatient().getAddress().get(0).getPostalCode() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getPostalCode().toString());
-            pixPatientDto.setAddrStreetAddressLine((fhirPatientDto.getPatient().getAddress().get(0).getLine() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getLine().toString());
+            pixPatientDto.setAddrStreetAddressLine((fhirPatientDto.getPatient().getAddress().get(0).getLine() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getLine().get(0).getValue());
         }
         return pixPatientDto;
     }
@@ -257,4 +258,5 @@ public class PixOperationServiceImpl implements PixOperationService {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
         return simpleDateFormat.format(utilDate);
     }
+
 }
