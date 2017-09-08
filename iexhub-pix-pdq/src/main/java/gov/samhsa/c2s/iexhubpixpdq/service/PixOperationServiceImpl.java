@@ -1,12 +1,23 @@
 package gov.samhsa.c2s.iexhubpixpdq.service;
 
+import gov.samhsa.c2s.common.marshaller.SimpleMarshaller;
+import gov.samhsa.c2s.common.marshaller.SimpleMarshallerException;
 import gov.samhsa.c2s.iexhubpixpdq.config.IexhubPixPdqProperties;
+import gov.samhsa.c2s.iexhubpixpdq.service.dto.FhirPatientDto;
+import gov.samhsa.c2s.iexhubpixpdq.service.dto.PixPatientDto;
+import gov.samhsa.c2s.iexhubpixpdq.service.exception.MrnNotFoundException;
+import gov.samhsa.c2s.iexhubpixpdq.service.exception.PatientNotFoundException;
+import gov.samhsa.c2s.iexhubpixpdq.service.exception.PixOperationException;
 import gov.samhsa.c2s.pixclient.service.PixManagerService;
 import gov.samhsa.c2s.pixclient.util.PixManagerBean;
 import gov.samhsa.c2s.pixclient.util.PixManagerMessageHelper;
 import gov.samhsa.c2s.pixclient.util.PixManagerRequestXMLToJava;
 import gov.samhsa.c2s.pixclient.util.PixPdqConstants;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.hl7.fhir.dstu3.model.ContactPoint;
+import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.v3.MCCIIN000002UV01;
 import org.hl7.v3.PRPAIN201301UV02;
 import org.hl7.v3.PRPAIN201302UV02;
@@ -14,10 +25,15 @@ import org.hl7.v3.PRPAIN201309UV02;
 import org.hl7.v3.PRPAIN201310UV02;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
-import java.util.stream.Collectors;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
+
+import static java.util.stream.Collectors.joining;
 
 @Service
 @Slf4j
@@ -26,15 +42,21 @@ public class PixOperationServiceImpl implements PixOperationService {
     private final PixManagerService pixMgrService;
     private final PixManagerMessageHelper pixManagerMessageHelper;
     private final IexhubPixPdqProperties iexhubPixPdqProperties;
+    private final Hl7v3Transformer hl7v3Transformer;
+    private final SimpleMarshaller simpleMarshaller;
+
+    private String SAMPLE_QUERY_REQUEST_XML = "empi_pixquery_sample.xml";
 
     @Autowired
-    public PixOperationServiceImpl(PixManagerRequestXMLToJava requestXMLToJava, PixManagerService pixMgrService, PixManagerMessageHelper pixManagerMessageHelper, IexhubPixPdqProperties iexhubPixPdqProperties) {
+    public PixOperationServiceImpl(PixManagerRequestXMLToJava requestXMLToJava, PixManagerService pixMgrService, PixManagerMessageHelper pixManagerMessageHelper, IexhubPixPdqProperties iexhubPixPdqProperties,
+                                   Hl7v3Transformer hl7v3Transformer, SimpleMarshaller simpleMarshaller) {
         this.requestXMLToJava = requestXMLToJava;
         this.pixMgrService = pixMgrService;
         this.pixManagerMessageHelper = pixManagerMessageHelper;
         this.iexhubPixPdqProperties = iexhubPixPdqProperties;
+        this.hl7v3Transformer = hl7v3Transformer;
+        this.simpleMarshaller = simpleMarshaller;
     }
-
 
     @Override
     public String addPerson(String reqXMLPath) {
@@ -87,38 +109,170 @@ public class PixOperationServiceImpl implements PixOperationService {
     }
 
     @Override
-    public PixManagerBean queryPerson(String reqXMLPath) {
+    public String queryForEnterpriseId(String patientId, String patientMrnOid) {
         final PixManagerBean pixMgrBean = new PixManagerBean();
-
-        log.debug("Received request to PIXQuery");
-
-        PRPAIN201309UV02 request;
-
-        PRPAIN201310UV02 response;
-        // Delegate to webServiceTemplate for the actual pixadd
         try {
+            //First, get sample request object
+            PRPAIN201309UV02 request = requestXMLToJava.getPIXQueryReqObject(SAMPLE_QUERY_REQUEST_XML);
 
-            request = requestXMLToJava.getPIXQueryReqObject(reqXMLPath);
+            //Next, change the sample request data to include the right query params
+            org.hl7.v3.II patientIdentifierValue = request.getControlActProcess().getQueryByParameter().getValue().getParameterList().getPatientIdentifier().get(0).getValue().get(0);
+            patientIdentifierValue.setRoot(patientMrnOid);
+            patientIdentifierValue.setExtension(patientId);
 
-            response = pixMgrService.pixManagerPRPAIN201309UV02(request);
-            pixManagerMessageHelper.getQueryMessage(response, pixMgrBean);
+            //Query
+            PRPAIN201310UV02 response = pixMgrService.pixManagerPRPAIN201309UV02(request);
+            pixManagerMessageHelper.setQueryMessage(response, pixMgrBean);
+
+            String globalDomainId = iexhubPixPdqProperties.getGlobalDomainId();
+            if (pixMgrBean.isSuccess()) {
+                String enterpriseIdValue = pixMgrBean.getQueryIdMap().entrySet().stream()
+                        .filter(map -> globalDomainId.equals(map.getKey()))
+                        .map(Map.Entry::getValue)
+                        .collect(joining());
+
+                log.debug("Found EnterpriseIdValue = " + enterpriseIdValue);
+
+                if (enterpriseIdValue != null && !enterpriseIdValue.isEmpty()) {
+                    //Convert to this format: d3bb3930-7241-11e3-b4f7-00155d3a2124^^^&2.16.840.1.113883.4.357&ISO
+                    String enterpriseId = enterpriseIdValue + "^^^&" + globalDomainId + "&" + iexhubPixPdqProperties.getGlobalDomainIdTypeCode();
+                    log.info("Found EnterpriseId = " + enterpriseId);
+                    return enterpriseId;
+                } else {
+                    log.error("Pix Query was successful, but no matching value found that matches with identifier " + globalDomainId);
+                    throw new PatientNotFoundException("No patient identifier found that matches with the Identifier Domain value: " + globalDomainId);
+                }
+
+            } else {
+                log.error("Pix Query found no matching Patient:" + patientId + " Oid:" + patientMrnOid);
+                throw new PatientNotFoundException("Pix Query found no matching Patient. Query Message = " + pixMgrBean.getQueryMessage());
+            }
+
         } catch (JAXBException | IOException e) {
-            pixManagerMessageHelper.getGeneralExpMessage(e, pixMgrBean,
-                    PixPdqConstants.PIX_QUERY.getMsg());
-            log.error(e.getMessage());
+            log.error("Error when converting QUERY_REQUEST_XML to PRPAIN201301UV02 request object", e);
+            throw new PixOperationException("Error when converting QUERY_REQUEST_XML to PRPAIN201301UV02 request object", e);
         }
-        log.debug("response" + pixMgrBean.getQueryMessage() + pixMgrBean.getQueryIdMap());
-        return pixMgrBean;
     }
 
     @Override
-    public String getPersonEid(String reqXMLPath) {
-        final PixManagerBean pixMgrBean = queryPerson(reqXMLPath);
-        String eid = pixMgrBean.getQueryIdMap().entrySet().stream()
-                .filter(map -> iexhubPixPdqProperties.getGlobalDomainId().equals(map.getKey()))
-                .map(map -> map.getValue())
-                .collect(Collectors.joining());
-        log.info("Eid \t" + eid);
-        return eid;
+    public String registerPerson(FhirPatientDto fhirPatientDto) {
+
+        // Convert FHIR Patient to PatientDto
+        PixPatientDto pixPatientDto = fhirPatientDtoToPixPatientDto(fhirPatientDto);
+        // Translate PatientDto to PixAddRequest XML
+        String pixAddXml = buildFhirPatient2PixAddXml(pixPatientDto);
+        // Invoke addPerson method that register patient to openempi
+        String addMessage = addPerson(pixAddXml);
+        Assert.hasText(addMessage, "Add Success!");
+        return addMessage;
     }
+
+    @Override
+    public String editPerson(String patientId, FhirPatientDto fhirPatientDto) {
+        // TODO:: Assert patienid
+
+        //Convert FHIR patient to PatientDto
+        PixPatientDto pixPatientDto = fhirPatientDtoToPixPatientDto(fhirPatientDto);
+        //Translate PatientDto to Pix
+        String pixUpdateXml = buildFhirPatient2PixUpdateXml(pixPatientDto);
+        //Invoke updatePerson method
+        String updateMessage = updatePerson(pixUpdateXml);
+        Assert.hasText(updateMessage,
+                "Update Success");
+
+        return updateMessage;
+    }
+
+    private String buildFhirPatient2PixAddXml(PixPatientDto pixPatientDto) {
+
+        String hl7PixAddXml;
+        try {
+            hl7PixAddXml = hl7v3Transformer.transformToHl7v3PixXml(
+                    simpleMarshaller.marshal(pixPatientDto),
+                    XslResource.XSLT_FHIR_PATIENT_DTO_TO_PIX_ADD.getFileName());
+        } catch (SimpleMarshallerException e) {
+            log.error("Error in JAXB Transfroming", e);
+            throw new PixOperationException(e);
+        }
+        return hl7PixAddXml;
+
+    }
+
+    private String buildFhirPatient2PixUpdateXml(PixPatientDto pixPatientDto) {
+        String h17PixUpdateXml;
+        try {
+            h17PixUpdateXml = hl7v3Transformer.transformToHl7v3PixXml(simpleMarshaller.marshal(pixPatientDto),
+                    XslResource.XSLT_FHIR_PATIENT_DTO_TO_PIX_UPDATE.getFileName());
+        } catch (SimpleMarshallerException e) {
+            log.error("Error in JAXB Transforming", e);
+            throw new PixOperationException(e);
+        }
+        return h17PixUpdateXml;
+    }
+
+    private PixPatientDto fhirPatientDtoToPixPatientDto(FhirPatientDto fhirPatientDto) {
+        PixPatientDto pixPatientDto = new PixPatientDto();
+        pixPatientDto.setBirthTimeValue(getBirthDate(fhirPatientDto.getPatient().getBirthDate()));
+        pixPatientDto.setPatientFirstName(fhirPatientDto.getPatient().getNameFirstRep().getGivenAsSingleString());
+        pixPatientDto.setPatientLastName(fhirPatientDto.getPatient().getNameFirstRep().getFamily());
+        pixPatientDto.setIdExtension(fhirPatientDto.getPatient().getIdentifier().stream()
+                .filter(identifier -> identifier.getUse().equals(Identifier.IdentifierUse.OFFICIAL))
+                .map(mrn -> mrn.getValue()).findAny().orElseThrow(MrnNotFoundException::new));
+        String mrnSystem = fhirPatientDto.getPatient().getIdentifier().stream()
+                .filter(identifier -> identifier.getUse().equals(Identifier.IdentifierUse.OFFICIAL))
+                .map(mrn -> mrn.getSystem()).findAny().orElseThrow(MrnNotFoundException::new);
+
+        //remove urn:oid:
+        if (mrnSystem.toLowerCase().contains("urn:oid:")) {
+            mrnSystem = StringUtils.substringAfter(mrnSystem, "urn:oid:");
+        }
+
+        pixPatientDto.setIdRoot(mrnSystem);
+
+        pixPatientDto.setAdministrativeGenderCode(getAdminGenderCode(fhirPatientDto.getPatient().getGender().name()));
+        pixPatientDto.setTelecomValue(
+                fhirPatientDto.getPatient().getTelecom().stream()
+                        .filter(telecom -> telecom.getSystem().getDisplay().equalsIgnoreCase(ContactPoint.ContactPointSystem.PHONE.getDisplay()))
+                        .map(ContactPoint::getValue).findFirst().orElse(""));
+
+        pixPatientDto.setEmailValue(
+                fhirPatientDto.getPatient().getTelecom().stream()
+                        .filter(telecom -> telecom.getSystem().getDisplay().equalsIgnoreCase(ContactPoint.ContactPointSystem.EMAIL.getDisplay()))
+                        .map(ContactPoint::getValue).findFirst().orElse(""));
+
+        if (fhirPatientDto.getPatient().getAddress().isEmpty()) {
+            pixPatientDto.setAddrStreetAddressLine1("");
+        } else {
+            pixPatientDto.setAddrStreetAddressLine1((fhirPatientDto.getPatient().getAddress().get(0).getLine() == null || fhirPatientDto.getPatient().getAddress().get(0).getLine().get(0) == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0)
+                    .getLine().get(0).getValue());
+            pixPatientDto.setAddrStreetAddressLine2((fhirPatientDto.getPatient().getAddress().get(0).getLine() == null || fhirPatientDto.getPatient().getAddress().get(0).getLine().get(1) == null) ? "" : fhirPatientDto.getPatient().getAddress()
+                    .get(0)
+                    .getLine().get(1).getValue());
+            pixPatientDto.setAddrCity((fhirPatientDto.getPatient().getAddress().get(0).getCity() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getCity().toString());
+            pixPatientDto.setAddrState((fhirPatientDto.getPatient().getAddress().get(0).getState() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getState().toString());
+            pixPatientDto.setAddrPostalCode((fhirPatientDto.getPatient().getAddress().get(0).getPostalCode() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getPostalCode().toString());
+            pixPatientDto.setAddCountry((fhirPatientDto.getPatient().getAddress().get(0).getCountry() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getCountry().toString());
+        }
+        return pixPatientDto;
+    }
+
+    private String getAdminGenderCode(String genderName) {
+        String genderCode = "U";
+        if (genderName.equalsIgnoreCase(Enumerations.AdministrativeGender.MALE.name())) {
+            genderCode = "M";
+        } else if (genderName.equalsIgnoreCase(Enumerations.AdministrativeGender.FEMALE.name())) {
+            genderCode = "F";
+        } else if (genderName.equalsIgnoreCase(Enumerations.AdministrativeGender.OTHER.name())) {
+            genderCode = "O";
+        } else if (genderName.equalsIgnoreCase(Enumerations.AdministrativeGender.UNKNOWN.name())) {
+            genderCode = "U";
+        }
+        return genderCode;
+    }
+
+    private String getBirthDate(Date utilDate) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+        return simpleDateFormat.format(utilDate);
+    }
+
 }

@@ -1,0 +1,2 @@
+@javax.xml.bind.annotation.XmlSchema(namespace = "gov.samhsa.c2s.iexhubpixpdq.service.dto", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+package gov.samhsa.c2s.iexhubpixpdq.service.dto;

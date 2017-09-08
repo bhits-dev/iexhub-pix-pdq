@@ -23,19 +23,43 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <cxf.version>3.1.12</cxf.version>
         <java.version>1.8</java.version>
-        <pix-pdq-client.version>0.1.0-SNAPSHOT</pix-pdq-client.version>
         <lombok.version>1.16.18</lombok.version>
         <junit.version>4.12</junit.version>
         <commons-logging.version>1.2</commons-logging.version>
-        <c2s.common-libraries.version>1.13.0</c2s.common-libraries.version>
+        <c2s.resource-url.version>1.16.0</c2s.resource-url.version>
+        <c2s.document-transformer.version>1.16.0</c2s.document-transformer.version>
+        <c2s.document-accessor.version>1.16.0</c2s.document-accessor.version>
+        <c2s.document-converter.version>1.16.0</c2s.document-converter.version>
+        <c2s.pix-pdq-client.version>0.2.0</c2s.pix-pdq-client.version>
+        <hapi.fhir.version>2.2</hapi.fhir.version>
+        <modelmapper.version>0.7.8</modelmapper.version>
+        <spring.cloud.version>Dalston.SR3</spring.cloud.version>
+        <saxon-he.version>9.6.0-3</saxon-he.version>
+        <docker.maven.version>0.4.3</docker.maven.version>
         <maven-enforcer-plugin.version>3.0.0-M1</maven-enforcer-plugin.version>
     </properties>
 
     <dependencies>
+        <!-- Discovery Config -->
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-eureka</artifactId>
         </dependency>
+
+        <!-- Config Client Configuration -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
         <!-- C2S Common Libraries -->
         <dependency>
             <groupId>gov.samhsa.c2s</groupId>
@@ -44,8 +68,29 @@
         <dependency>
             <groupId>gov.samhsa.c2s</groupId>
             <artifactId>resource-url</artifactId>
-         </dependency>
+            <version>${c2s.resource-url.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.samhsa.c2s</groupId>
+            <artifactId>document-transformer</artifactId>
+            <version>${c2s.document-transformer.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.samhsa.c2s</groupId>
+            <artifactId>document-accessor</artifactId>
+            <version>${c2s.document-accessor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>gov.samhsa.c2s</groupId>
+            <artifactId>document-converter</artifactId>
+            <version>${c2s.document-converter.version}</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -57,20 +102,47 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-actuator</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
+        </dependency>
+        <!-- Saxon-HE dependencies -->
+        <dependency>
+            <groupId>net.sf.saxon</groupId>
+            <artifactId>Saxon-HE</artifactId>
+            <scope>runtime</scope>
+         </dependency>
+        <!-- HAPI FHIR JARS -->
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-base</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-structures-dstu3</artifactId>
+        </dependency>
+        <!-- HAPI FHIR JARS -->
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -79,13 +151,8 @@
             <!-- C2S Common Libraries -->
             <dependency>
                 <groupId>gov.samhsa.c2s</groupId>
-                <artifactId>resource-url</artifactId>
-                <version>${c2s.common-libraries.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>gov.samhsa.c2s</groupId>
                 <artifactId>pix-pdq-client</artifactId>
-                <version>${pix-pdq-client.version}</version>
+                <version>${c2s.pix-pdq-client.version}</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>jcl-over-slf4j</artifactId>
@@ -98,6 +165,13 @@
                 </exclusions>
             </dependency>
             <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring.cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
                 <groupId>commons-logging</groupId>
                 <artifactId>commons-logging</artifactId>
                 <version>${commons-logging.version}</version>
@@ -108,12 +182,29 @@
                 <version>${lombok.version}</version>
                 <optional>true</optional>
             </dependency>
+            <!-- Saxon-HE dependencies -->
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-                <scope>test</scope>
+                <groupId>net.sf.saxon</groupId>
+                <artifactId>Saxon-HE</artifactId>
+                <version>${saxon-he.version}</version>
             </dependency>
+            <!-- HAPI FHIR JARS -->
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-base</artifactId>
+                <version>${hapi.fhir.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
+                <version>${hapi.fhir.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-structures-dstu3</artifactId>
+                <version>${hapi.fhir.version}</version>
+            </dependency>
+            <!-- HAPI FHIR JARS -->
         </dependencies>
     </dependencyManagement>
 
@@ -128,6 +219,28 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <junitArtifactName> junit:junit:{junit.version} </junitArtifactName>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>${docker.maven.version}</version>
+                <configuration>
+                    <imageName>bhits/${project.artifactId}</imageName>
+                    <dockerDirectory>src/main/docker</dockerDirectory>
+                    <imageTags>
+                        <imageTag>${project.version}</imageTag>
+                    </imageTags>
+                    <buildArgs>
+                        <finalName>${project.build.finalName}.jar</finalName>
+                    </buildArgs>
+                    <resources>
+                        <resource>
+                            <targetPath>/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
                 </configuration>
             </plugin>
             <plugin>
@@ -146,18 +259,11 @@
                                 <bannedDependencies>
                                     <excludes>
                                         <exclude>com.netflix.ribbon:ribbon-httpclient:jar:(,2.2.0]</exclude>
-                                        <exclude>com.sun.jersey:jersey-core:(,1.19.1]</exclude>
-                                        <exclude>com.thoughtworks.xstream:xstream:(,1.4.9]</exclude>
-                                        <exclude>commons-configuration:commons-configuration:(,1.8]</exclude>
                                         <exclude>de.codecentric:spring-boot-admin-sample-eureka:(,1.4.4]</exclude>
-                                        <exclude>io.netty:netty-handler:(,4.1.1.Final)</exclude>
-                                        <exclude>javax.xml.stream:stax-api:(,1.0-2]</exclude>
                                         <exclude>mysql:mysql-connector-java:(,5.1.41]</exclude>
                                         <exclude>org.apache.httpcomponents:httpclient:jar:(,4.5.2]</exclude>
-                                        <exclude>org.apache.httpcomponents:httpcore:(,4.4.6]</exclude>
                                         <exclude>org.apache.tomcat.embed:tomcat-embed-core:(,8.5.14]</exclude>
                                         <exclude>org.apache.tomcat.embed:tomcat-embed-core:[9.0.0.M1,9.0.0.M18]</exclude>
-                                        <exclude>org.bouncycastle:bcprov-jdk15on:(,1.55]</exclude>
                                         <exclude>org.codehaus.jackson:jackson-mapper-asl:(,1.9.13]</exclude>
                                         <exclude>org.drools:drools-core:(,6.2.0.Final)</exclude>
                                         <exclude>org.eclipse.acceleo:org.eclipse.ocl:(,3.4.2.v20140725-2242]</exclude>
@@ -167,10 +273,7 @@
                                         <exclude>org.openwms:org.openwms.configuration:(,1.0.0]</exclude>
                                         <exclude>org.openwms:org.openwms.services:(,1.0.0]</exclude>
                                         <exclude>org.springframework.batch:spring-batch-core:(,3.0.7.RELEASE]</exclude>
-                                        <exclude>org.springframework.cloud:spring-cloud-config-client:(,1.3.2.RELEASE]</exclude>
                                         <exclude>org.springframework.data:spring-data-rest-webmvc:(,2.5.7.RELEASE]</exclude>
-                                        <exclude>org.springframework.security:spring-security-crypto:(,4.2.3.RELEASE]</exclude>
-                                        <exclude>org.springframework.security:spring-security-rsa:(,1.0.3.RELEASE]</exclude>
                                         <exclude>org.springframework:spring-web:jar:(,4.3.6.RELEASE]</exclude>
                                         <exclude>org.springframework:spring-webmvc:(,4.3.6.RELEASE]</exclude>
                                         <exclude>xerces:xercesImpl:(,2.11.0]</exclude>
@@ -181,6 +284,18 @@
                                         <!--<exclude>com.fasterxml.jackson.core:jackson-databind:(,2.8.9]</exclude>-->
                                         <!--<exclude>org.springframework.boot:spring-boot-actuator:(,1.5.6.RELEASE]</exclude>-->
                                         <!--<exclude>org.springframework.boot:spring-boot-autoconfigure:(,1.5.6.RELEASE]</exclude>-->
+                                        <!--<exclude>io.netty:netty-handler:(,4.1.1.Final)</exclude>-->
+                                        <!--<exclude>com.thoughtworks.xstream:xstream:(,1.4.9]</exclude>-->
+                                        <!--<exclude>commons-configuration:commons-configuration:(,1.8]</exclude>-->
+                                        <!--<exclude>org.springframework.security:spring-security-crypto:(,4.2.3.RELEASE]</exclude>-->
+                                        <!--<exclude>com.sun.jersey:jersey-core:(,1.19.1]</exclude>-->
+                                        <!--<exclude>org.springframework.security:spring-security-rsa:(,1.0.3.RELEASE]</exclude>-->
+                                        <!--<exclude>org.springframework.cloud:spring-cloud-config-client:(,1.3.2.RELEASE]</exclude>-->
+
+                                        <!-- FHIR Jars -->
+                                        <!--<exclude>org.apache.httpcomponents:httpcore:(,4.4.6]</exclude>-->
+                                        <!--<exclude>javax.xml.stream:stax-api:(,1.0-2]</exclude>-->
+
                                     </excludes>
                                 </bannedDependencies>
                             </rules>
