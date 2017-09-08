@@ -8,8 +8,6 @@ logging:
 c2s:
   iexhub-pix-pdq:
     pixManagerServiceEndPoint: http://bhitsdevhie01/openempi-admin/services/PIXManager_Port_Soap12
-    pixDomainId: 1.3.6.1.4.1.21367.13.20.205
-    pixDomainName: FEI-DEV-IEXHUB
     globalDomainId: 2.16.840.1.113883.4.357
     globalDomainIdTypeCode: hl7
     fhir:
