@@ -17,12 +17,6 @@ public class IexhubPixPdqProperties {
     private String pixManagerServiceEndPoint;
 
     @NotBlank
-    private String pixDomainId;
-
-    @NotBlank
-    private String pixDomainName;
-
-    @NotBlank
     private String globalDomainId;
 
     @NotBlank
