@@ -47,7 +47,6 @@
 						<urn:subject1 typeCode="SBJ">
 							<urn:patient classCode="PAT">
 								<urn:id extension="{/c2s:PixPatientDto/c2s:idExtension[1]}"
-										assigningAuthorityName="{/c2s:PixPatientDto/c2s:idAssigningAuthorityName[1]}"
 										root="{/c2s:PixPatientDto/c2s:idRoot[1]}"/>
 								<urn:statusCode code="active"/>
 								<urn:patientPerson>
@@ -61,21 +60,28 @@
 											<xsl:value-of
 													select="/c2s:PixPatientDto/c2s:patientLastName[1]"/>
 										</urn:family>
+
+
 									</urn:name>
-									<urn:telecom value="email:{/c2s:PixPatientDto/c2s:telecomValue[1]}" />
+									<urn:telecom value="{/c2s:PixPatientDto/c2s:telecomValue[1]}" />
+									<urn:telecom value="{/c2s:PixPatientDto/c2s:emailValue[1]}" />
 									<urn:administrativeGenderCode
 											code="{/c2s:PixPatientDto/c2s:administrativeGenderCode[1]}"/>
 									<urn:birthTime
 											value="{/c2s:PixPatientDto/c2s:birthTimeValue[1]}"/>
 									<urn:addr>
 										<urn:streetAddressLine> <xsl:value-of
-												select="/c2s:PixPatientDto/c2s:addrStreetAddressLine[1]" /></urn:streetAddressLine>
+												select="/c2s:PixPatientDto/c2s:addrStreetAddressLine1[1]" /></urn:streetAddressLine>
+										<urn:streetAddressLine> <xsl:value-of
+												select="/c2s:PixPatientDto/c2s:addrStreetAddressLine2[1]" /></urn:streetAddressLine>
 										<urn:city><xsl:value-of
 												select="/c2s:PixPatientDto/c2s:addrCity[1]" /></urn:city>
 										<urn:state><xsl:value-of
 												select="/c2s:PixPatientDto/c2s:addrState[1]" /></urn:state>
 										<urn:postalCode><xsl:value-of
 												select="/c2s:PixPatientDto/c2s:addrPostalCode[1]" /></urn:postalCode>
+										<urn:country><xsl:value-of
+												select="/c2s:PixPatientDto/c2s:addCountry[1]" /></urn:country>
 									</urn:addr>
 								</urn:patientPerson>
 							</urn:patient>
