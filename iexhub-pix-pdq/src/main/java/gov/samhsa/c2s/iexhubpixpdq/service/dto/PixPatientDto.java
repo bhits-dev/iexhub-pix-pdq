@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 @Data
 public class PixPatientDto {
-	private String messageId = UUID.randomUUID().toString();
+	private String messageId;
 	private String idExtension;
 	private String idRoot;
 	private String idAssigningAuthorityName;
@@ -23,7 +23,7 @@ public class PixPatientDto {
 	private String patientMiddleName;
 	private String patientLastName;
 	private String patientEmailHome;
-	private String telecomUse ="H";
+	private String telecomUse;
 	private String telecomValue;
 	private String emailValue;
 	private String administrativeGenderCode;

@@ -23,7 +23,7 @@ spring:
   profiles: docker
 c2s:
   iexhub-pix-pdq:
-    pixManagerServiceEndPoint: http:/openempi.c2s.com:8080/openempi-admin/services/PIXManager_Port_Soap12
+    pixManagerServiceEndPoint: http://openempi.c2s.com:8080/openempi-admin/services/PIXManager_Port_Soap12
     fhir:
       # configure fhir server base url
       serverUrl: http://hapi-fhir.c2s.com:8080/hapi-fhir-jpaserver/baseStu3
