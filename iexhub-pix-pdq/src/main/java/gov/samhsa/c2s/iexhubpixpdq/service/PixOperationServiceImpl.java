@@ -5,7 +5,6 @@ import gov.samhsa.c2s.common.marshaller.SimpleMarshallerException;
 import gov.samhsa.c2s.iexhubpixpdq.config.IexhubPixPdqProperties;
 import gov.samhsa.c2s.iexhubpixpdq.service.dto.FhirPatientDto;
 import gov.samhsa.c2s.iexhubpixpdq.service.dto.PixPatientDto;
-import gov.samhsa.c2s.iexhubpixpdq.service.exception.MrnNotFoundException;
 import gov.samhsa.c2s.iexhubpixpdq.service.exception.PatientNotFoundException;
 import gov.samhsa.c2s.iexhubpixpdq.service.exception.PixOperationException;
 import gov.samhsa.c2s.pixclient.service.PixManagerService;
@@ -14,10 +13,6 @@ import gov.samhsa.c2s.pixclient.util.PixManagerMessageHelper;
 import gov.samhsa.c2s.pixclient.util.PixManagerRequestXMLToJava;
 import gov.samhsa.c2s.pixclient.util.PixPdqConstants;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
-import org.hl7.fhir.dstu3.model.ContactPoint;
-import org.hl7.fhir.dstu3.model.Enumerations;
-import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.v3.MCCIIN000002UV01;
 import org.hl7.v3.PRPAIN201301UV02;
 import org.hl7.v3.PRPAIN201302UV02;
@@ -29,8 +24,6 @@ import org.springframework.util.Assert;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
@@ -44,18 +37,20 @@ public class PixOperationServiceImpl implements PixOperationService {
     private final IexhubPixPdqProperties iexhubPixPdqProperties;
     private final Hl7v3Transformer hl7v3Transformer;
     private final SimpleMarshaller simpleMarshaller;
+    private final PixPatientDtoConverter pixPatientDtoConverter;
 
     private String SAMPLE_QUERY_REQUEST_XML = "empi_pixquery_sample.xml";
 
     @Autowired
     public PixOperationServiceImpl(PixManagerRequestXMLToJava requestXMLToJava, PixManagerService pixMgrService, PixManagerMessageHelper pixManagerMessageHelper, IexhubPixPdqProperties iexhubPixPdqProperties,
-                                   Hl7v3Transformer hl7v3Transformer, SimpleMarshaller simpleMarshaller) {
+                                   Hl7v3Transformer hl7v3Transformer, SimpleMarshaller simpleMarshaller, PixPatientDtoConverter pixPatientDtoConverter) {
         this.requestXMLToJava = requestXMLToJava;
         this.pixMgrService = pixMgrService;
         this.pixManagerMessageHelper = pixManagerMessageHelper;
         this.iexhubPixPdqProperties = iexhubPixPdqProperties;
         this.hl7v3Transformer = hl7v3Transformer;
         this.simpleMarshaller = simpleMarshaller;
+        this.pixPatientDtoConverter = pixPatientDtoConverter;
     }
 
     @Override
@@ -158,7 +153,7 @@ public class PixOperationServiceImpl implements PixOperationService {
     public String registerPerson(FhirPatientDto fhirPatientDto) {
 
         // Convert FHIR Patient to PatientDto
-        PixPatientDto pixPatientDto = fhirPatientDtoToPixPatientDto(fhirPatientDto);
+        PixPatientDto pixPatientDto = pixPatientDtoConverter.fhirPatientDtoToPixPatientDto(fhirPatientDto);
         // Translate PatientDto to PixAddRequest XML
         String pixAddXml = buildFhirPatient2PixAddXml(pixPatientDto);
         // Invoke addPerson method that register patient to openempi
@@ -172,7 +167,7 @@ public class PixOperationServiceImpl implements PixOperationService {
         // TODO:: Assert patienid
 
         //Convert FHIR patient to PatientDto
-        PixPatientDto pixPatientDto = fhirPatientDtoToPixPatientDto(fhirPatientDto);
+        PixPatientDto pixPatientDto = pixPatientDtoConverter.fhirPatientDtoToPixPatientDto(fhirPatientDto);
         //Translate PatientDto to Pix
         String pixUpdateXml = buildFhirPatient2PixUpdateXml(pixPatientDto);
         //Invoke updatePerson method
@@ -210,69 +205,5 @@ public class PixOperationServiceImpl implements PixOperationService {
         return h17PixUpdateXml;
     }
 
-    private PixPatientDto fhirPatientDtoToPixPatientDto(FhirPatientDto fhirPatientDto) {
-        PixPatientDto pixPatientDto = new PixPatientDto();
-        pixPatientDto.setBirthTimeValue(getBirthDate(fhirPatientDto.getPatient().getBirthDate()));
-        pixPatientDto.setPatientFirstName(fhirPatientDto.getPatient().getNameFirstRep().getGivenAsSingleString());
-        pixPatientDto.setPatientLastName(fhirPatientDto.getPatient().getNameFirstRep().getFamily());
-        pixPatientDto.setIdExtension(fhirPatientDto.getPatient().getIdentifier().stream()
-                .filter(identifier -> identifier.getUse().equals(Identifier.IdentifierUse.OFFICIAL))
-                .map(mrn -> mrn.getValue()).findAny().orElseThrow(MrnNotFoundException::new));
-        String mrnSystem = fhirPatientDto.getPatient().getIdentifier().stream()
-                .filter(identifier -> identifier.getUse().equals(Identifier.IdentifierUse.OFFICIAL))
-                .map(mrn -> mrn.getSystem()).findAny().orElseThrow(MrnNotFoundException::new);
-
-        //remove urn:oid:
-        if (mrnSystem.toLowerCase().contains("urn:oid:")) {
-            mrnSystem = StringUtils.substringAfter(mrnSystem, "urn:oid:");
-        }
-
-        pixPatientDto.setIdRoot(mrnSystem);
-
-        pixPatientDto.setAdministrativeGenderCode(getAdminGenderCode(fhirPatientDto.getPatient().getGender().name()));
-        pixPatientDto.setTelecomValue(
-                fhirPatientDto.getPatient().getTelecom().stream()
-                        .filter(telecom -> telecom.getSystem().getDisplay().equalsIgnoreCase(ContactPoint.ContactPointSystem.PHONE.getDisplay()))
-                        .map(ContactPoint::getValue).findFirst().orElse(""));
-
-        pixPatientDto.setEmailValue(
-                fhirPatientDto.getPatient().getTelecom().stream()
-                        .filter(telecom -> telecom.getSystem().getDisplay().equalsIgnoreCase(ContactPoint.ContactPointSystem.EMAIL.getDisplay()))
-                        .map(ContactPoint::getValue).findFirst().orElse(""));
-
-        if (fhirPatientDto.getPatient().getAddress().isEmpty()) {
-            pixPatientDto.setAddrStreetAddressLine1("");
-        } else {
-            pixPatientDto.setAddrStreetAddressLine1((fhirPatientDto.getPatient().getAddress().get(0).getLine() == null || fhirPatientDto.getPatient().getAddress().get(0).getLine().get(0) == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0)
-                    .getLine().get(0).getValue());
-            pixPatientDto.setAddrStreetAddressLine2((fhirPatientDto.getPatient().getAddress().get(0).getLine() == null || fhirPatientDto.getPatient().getAddress().get(0).getLine().get(1) == null) ? "" : fhirPatientDto.getPatient().getAddress()
-                    .get(0)
-                    .getLine().get(1).getValue());
-            pixPatientDto.setAddrCity((fhirPatientDto.getPatient().getAddress().get(0).getCity() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getCity().toString());
-            pixPatientDto.setAddrState((fhirPatientDto.getPatient().getAddress().get(0).getState() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getState().toString());
-            pixPatientDto.setAddrPostalCode((fhirPatientDto.getPatient().getAddress().get(0).getPostalCode() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getPostalCode().toString());
-            pixPatientDto.setAddCountry((fhirPatientDto.getPatient().getAddress().get(0).getCountry() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getCountry().toString());
-        }
-        return pixPatientDto;
-    }
-
-    private String getAdminGenderCode(String genderName) {
-        String genderCode = "U";
-        if (genderName.equalsIgnoreCase(Enumerations.AdministrativeGender.MALE.name())) {
-            genderCode = "M";
-        } else if (genderName.equalsIgnoreCase(Enumerations.AdministrativeGender.FEMALE.name())) {
-            genderCode = "F";
-        } else if (genderName.equalsIgnoreCase(Enumerations.AdministrativeGender.OTHER.name())) {
-            genderCode = "O";
-        } else if (genderName.equalsIgnoreCase(Enumerations.AdministrativeGender.UNKNOWN.name())) {
-            genderCode = "U";
-        }
-        return genderCode;
-    }
-
-    private String getBirthDate(Date utilDate) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
-        return simpleDateFormat.format(utilDate);
-    }
 
 }
