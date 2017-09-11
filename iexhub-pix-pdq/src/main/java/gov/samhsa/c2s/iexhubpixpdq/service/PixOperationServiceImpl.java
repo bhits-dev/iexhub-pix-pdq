@@ -20,16 +20,13 @@ import org.hl7.v3.PRPAIN201309UV02;
 import org.hl7.v3.PRPAIN201310UV02;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
+import static org.junit.Assert.assertNotNull;
 
 @Service
 @Slf4j
@@ -75,8 +72,8 @@ public class PixOperationServiceImpl implements PixOperationService {
                     PixPdqConstants.PIX_ADD.getMsg());
             log.error(e.getMessage() + e);
         }
-        log.debug("response" + pixMgrBean.getAddMessage() + "is Success" + pixMgrBean.isSuccess() );
-        return String.valueOf(pixMgrBean.isSuccess());
+        log.debug("response" + pixMgrBean.getAddMessage());
+        return pixMgrBean.getAddMessage();
     }
 
     @Override
@@ -101,8 +98,8 @@ public class PixOperationServiceImpl implements PixOperationService {
                     PixPdqConstants.PIX_UPDATE.getMsg());
             log.error(e.getMessage());
         }
-        log.debug("response" + pixMgrBean.getUpdateMessage()+ "is Success" + pixMgrBean.isSuccess() );
-        return String.valueOf(pixMgrBean.isSuccess());
+        log.debug("response" + pixMgrBean.getUpdateMessage());
+        return pixMgrBean.getUpdateMessage();
     }
 
     @Override
@@ -161,7 +158,7 @@ public class PixOperationServiceImpl implements PixOperationService {
         // Invoke addPerson method that register patient to openempi
         String addMessage = addPerson(pixAddXml);
         log.debug("server response " + addMessage);
-        assertNotNull(Boolean.valueOf(addMessage));
+        assertNotNull(addMessage);
         return addMessage;
     }
 
@@ -176,7 +173,7 @@ public class PixOperationServiceImpl implements PixOperationService {
         //Invoke updatePerson method
         String updateMessage = updatePerson(pixUpdateXml);
         log.debug("server response " + updateMessage);
-        assertNotNull(Boolean.valueOf(updateMessage));
+        assertNotNull(updateMessage);
 
         return updateMessage;
     }
