@@ -21,6 +21,7 @@ import org.hl7.v3.PRPAIN201310UV02;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 
@@ -160,7 +161,7 @@ public class PixOperationServiceImpl implements PixOperationService {
         // Invoke addPerson method that register patient to openempi
         String addMessage = addPerson(pixAddXml);
         log.debug("server response " + addMessage);
-        assertTrue(Boolean.valueOf(addMessage));
+        assertNotNull(Boolean.valueOf(addMessage));
         return addMessage;
     }
 
@@ -175,7 +176,7 @@ public class PixOperationServiceImpl implements PixOperationService {
         //Invoke updatePerson method
         String updateMessage = updatePerson(pixUpdateXml);
         log.debug("server response " + updateMessage);
-        assertTrue(Boolean.valueOf(updateMessage));
+        assertNotNull(Boolean.valueOf(updateMessage));
 
         return updateMessage;
     }
