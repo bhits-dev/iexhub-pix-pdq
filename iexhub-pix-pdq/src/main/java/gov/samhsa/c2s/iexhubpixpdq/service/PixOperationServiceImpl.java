@@ -20,13 +20,13 @@ import org.hl7.v3.PRPAIN201309UV02;
 import org.hl7.v3.PRPAIN201310UV02;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
+import static org.junit.Assert.assertNotNull;
 
 @Service
 @Slf4j
@@ -38,7 +38,6 @@ public class PixOperationServiceImpl implements PixOperationService {
     private final Hl7v3Transformer hl7v3Transformer;
     private final SimpleMarshaller simpleMarshaller;
     private final PixPatientDtoConverter pixPatientDtoConverter;
-
     private String SAMPLE_QUERY_REQUEST_XML = "empi_pixquery_sample.xml";
 
     @Autowired
@@ -99,7 +98,7 @@ public class PixOperationServiceImpl implements PixOperationService {
                     PixPdqConstants.PIX_UPDATE.getMsg());
             log.error(e.getMessage());
         }
-        log.debug("response" + pixMgrBean.getAddMessage());
+        log.debug("response" + pixMgrBean.getUpdateMessage());
         return pixMgrBean.getUpdateMessage();
     }
 
@@ -158,7 +157,8 @@ public class PixOperationServiceImpl implements PixOperationService {
         String pixAddXml = buildFhirPatient2PixAddXml(pixPatientDto);
         // Invoke addPerson method that register patient to openempi
         String addMessage = addPerson(pixAddXml);
-        Assert.hasText(addMessage, "Add Success!");
+        log.debug("server response " + addMessage);
+        assertNotNull(addMessage);
         return addMessage;
     }
 
@@ -172,8 +172,8 @@ public class PixOperationServiceImpl implements PixOperationService {
         String pixUpdateXml = buildFhirPatient2PixUpdateXml(pixPatientDto);
         //Invoke updatePerson method
         String updateMessage = updatePerson(pixUpdateXml);
-        Assert.hasText(updateMessage,
-                "Update Success");
+        log.debug("server response " + updateMessage);
+        assertNotNull(updateMessage);
 
         return updateMessage;
     }

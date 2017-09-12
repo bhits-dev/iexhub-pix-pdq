@@ -56,6 +56,13 @@
                                                     select="/c2s:PixPatientDto/c2s:patientFirstName[1]"
                                             />
                                         </urn:given>
+                                        <xsl:if test="not(/c2s:PixPatientDto/c2s:patientMiddleName[1] = '')" >
+                                            <urn:given>
+                                                <xsl:value-of
+                                                        select="/c2s:PixPatientDto/c2s:patientMiddleName[1]"
+                                                />
+                                            </urn:given>
+                                        </xsl:if>
                                         <urn:family>
                                             <xsl:value-of
                                                     select="/c2s:PixPatientDto/c2s:patientLastName[1]"/>
@@ -63,26 +70,43 @@
 
 
                                     </urn:name>
-                                    <urn:telecom value="{/c2s:PixPatientDto/c2s:telecomValue[1]}" />
+
                                     <urn:telecom value="{/c2s:PixPatientDto/c2s:emailValue[1]}" />
+                                    <xsl:if test="not(/c2s:PixPatientDto/c2s:telecomValue[1] = '')" >
+                                        <urn:telecom value="{/c2s:PixPatientDto/c2s:telecomValue[1]}" />
+                                    </xsl:if>
+
                                     <urn:administrativeGenderCode
                                             code="{/c2s:PixPatientDto/c2s:administrativeGenderCode[1]}"/>
                                     <urn:birthTime
                                             value="{/c2s:PixPatientDto/c2s:birthTimeValue[1]}"/>
-                                    <urn:addr>
-                                        <urn:streetAddressLine> <xsl:value-of
-                                                select="/c2s:PixPatientDto/c2s:addrStreetAddressLine1[1]" /></urn:streetAddressLine>
-                                        <urn:streetAddressLine> <xsl:value-of
-                                                select="/c2s:PixPatientDto/c2s:addrStreetAddressLine2[1]" /></urn:streetAddressLine>
-                                        <urn:city><xsl:value-of
-                                                select="/c2s:PixPatientDto/c2s:addrCity[1]" /></urn:city>
-                                        <urn:state><xsl:value-of
-                                                select="/c2s:PixPatientDto/c2s:addrState[1]" /></urn:state>
-                                        <urn:postalCode><xsl:value-of
-                                                select="/c2s:PixPatientDto/c2s:addrPostalCode[1]" /></urn:postalCode>
-                                        <urn:country><xsl:value-of
-                                                select="/c2s:PixPatientDto/c2s:addCountry[1]" /></urn:country>
-                                    </urn:addr>
+
+                                    <xsl:if test="not(/c2s:PixPatientDto/c2s:addrStreetAddressLine1[1] = '')">
+                                        <urn:addr>
+                                            <urn:streetAddressLine> <xsl:value-of
+                                                    select="/c2s:PixPatientDto/c2s:addrStreetAddressLine1[1]" /></urn:streetAddressLine>
+                                            <xsl:if test="not(/c2s:PixPatientDto/c2s:addrStreetAddressLine2[1] = '')" >
+                                                <urn:streetAddressLine> <xsl:value-of
+                                                        select="/c2s:PixPatientDto/c2s:addrStreetAddressLine2[1]" /></urn:streetAddressLine>
+                                            </xsl:if>
+                                            <xsl:if test="not(/c2s:PixPatientDto/c2s:addrCity[1] = '')" >
+                                                <urn:city><xsl:value-of
+                                                        select="/c2s:PixPatientDto/c2s:addrCity[1]" /></urn:city>
+                                            </xsl:if>
+                                            <xsl:if test="not(/c2s:PixPatientDto/c2s:addrState[1] = '')" >
+                                                <urn:state><xsl:value-of
+                                                        select="/c2s:PixPatientDto/c2s:addrState[1]" /></urn:state>
+                                            </xsl:if>
+                                            <xsl:if test="not(/c2s:PixPatientDto/c2s:addrPostalCode[1] = '')" >
+                                                <urn:postalCode><xsl:value-of
+                                                        select="/c2s:PixPatientDto/c2s:addrPostalCode[1]" /></urn:postalCode>
+                                            </xsl:if>
+                                            <xsl:if test="not(/c2s:PixPatientDto/c2s:addCountry[1] = '')" >
+                                                <urn:country><xsl:value-of
+                                                        select="/c2s:PixPatientDto/c2s:addCountry[1]" /></urn:country>
+                                            </xsl:if>
+                                        </urn:addr>
+                                    </xsl:if>
                                 </urn:patientPerson>
                             </urn:patient>
                         </urn:subject1>

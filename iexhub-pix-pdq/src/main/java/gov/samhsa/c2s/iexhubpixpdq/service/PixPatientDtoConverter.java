@@ -49,7 +49,7 @@ public class PixPatientDtoConverter {
         } else {
             pixPatientDto.setAddrStreetAddressLine1((fhirPatientDto.getPatient().getAddress().get(0).getLine() == null || fhirPatientDto.getPatient().getAddress().get(0).getLine().get(0) == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0)
                     .getLine().get(0).getValue());
-            pixPatientDto.setAddrStreetAddressLine2((fhirPatientDto.getPatient().getAddress().get(0).getLine() == null || fhirPatientDto.getPatient().getAddress().get(0).getLine().get(1) == null) ? "" : fhirPatientDto.getPatient().getAddress()
+            pixPatientDto.setAddrStreetAddressLine2((fhirPatientDto.getPatient().getAddress().get(0).getLine() == null || fhirPatientDto.getPatient().getAddress().get(0).getLine().size() < 2) ? "" : fhirPatientDto.getPatient().getAddress()
                     .get(0)
                     .getLine().get(1).getValue());
             pixPatientDto.setAddrCity((fhirPatientDto.getPatient().getAddress().get(0).getCity() == null) ? "" : fhirPatientDto.getPatient().getAddress().get(0).getCity().toString());
